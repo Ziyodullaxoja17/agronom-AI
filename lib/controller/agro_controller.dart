@@ -98,7 +98,7 @@ class AgroController extends ChangeNotifier {
 
     final result = await agroServicesRepo.insectPredict(imageUrl: imageUrl);
 
-    result.fold(
+    result!.fold(
       (failure) {
         errorAiModel = failure;
         resultAiModel = null;

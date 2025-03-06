@@ -19,6 +19,14 @@ class _LoginAgroScreenState extends State<LoginAgroScreen> {
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    phoneNumberController.dispose();
+    passwordController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -40,6 +48,8 @@ class _LoginAgroScreenState extends State<LoginAgroScreen> {
                       if (value == null || value.isEmpty) {
                         return "Enter phone number";
                       }
+                      // Regular expression for validating phone number
+
                       return null;
                     },
                   ),
@@ -49,8 +59,9 @@ class _LoginAgroScreenState extends State<LoginAgroScreen> {
                     hintText: "abc 123",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Enter password ";
+                        return "Enter password";
                       }
+
                       return null;
                     },
                   ),
@@ -65,19 +76,23 @@ class _LoginAgroScreenState extends State<LoginAgroScreen> {
             builder: (context, provider, child) {
               return GestureDetector(
                 onTap: () async {
-                  await provider.login(
-                      password: passwordController.text.trim(),
-                      phoneNumber: phoneNumberController.text.trim());
+                  if (_formKey.currentState!.validate()) {
+                    await provider.login(
+                        password: passwordController.text.trim(),
+                        phoneNumber: phoneNumberController.text.trim());
 
-                  if (provider.isAllowed) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MainAgroScreen(),
-                      ),
-                    );
-                  } else {
-                    log(provider.message);
+                    if (provider.isAllowed) {
+                      phoneNumberController.clear();
+                      passwordController.clear();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainAgroScreen(),
+                        ),
+                      );
+                    } else {
+                      log(provider.message);
+                    }
                   }
                 },
                 child: Container(

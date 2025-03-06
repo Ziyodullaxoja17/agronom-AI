@@ -17,6 +17,15 @@ class _RegisterLoginScreenState extends State<RegisterLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    phoneNumberController.dispose();
+    passwordController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +46,9 @@ class _RegisterLoginScreenState extends State<RegisterLoginScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Enter phone number";
+                      } else if (!RegExp(r'^\+998 \d{2} \d{3} \d{2} \d{2}$')
+                          .hasMatch(value)) {
+                        return "Enter a valid phone number";
                       }
                       return null;
                     },
@@ -47,7 +59,9 @@ class _RegisterLoginScreenState extends State<RegisterLoginScreen> {
                     hintText: "abc 123",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Enter password ";
+                        return "Enter password";
+                      } else if (value.length < 6) {
+                        return "Password must be at least 6 characters long";
                       }
                       return null;
                     },
@@ -63,19 +77,21 @@ class _RegisterLoginScreenState extends State<RegisterLoginScreen> {
             builder: (context, provider, child) {
               return GestureDetector(
                 onTap: () async {
-                  await provider.register(
-                      password: passwordController.text.trim(),
-                      phoneNumber: phoneNumberController.text.trim());
+                  if (_formKey.currentState!.validate()) {
+                    await provider.register(
+                        password: passwordController.text.trim(),
+                        phoneNumber: phoneNumberController.text.trim());
 
-                  if (provider.isAllowed) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MainAgroScreen(),
-                      ),
-                    );
-                  } else {
-                    log(provider.message);
+                    if (provider.isAllowed) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainAgroScreen(),
+                        ),
+                      );
+                    } else {
+                      log(provider.message);
+                    }
                   }
                 },
                 child: Container(

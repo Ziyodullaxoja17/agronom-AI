@@ -143,7 +143,7 @@ class AgroServicesRepo {
   }
 
 // predict by upoading image here
-  Future<Either<ErrorAiModel, ResultAiModel>> insectPredict(
+  Future<Either<ErrorAiModel, ResultAiModel>?> insectPredict(
       {required String imageUrl}) async {
     // to get token here
     final prefs = await SharedPreferences.getInstance();
@@ -164,10 +164,25 @@ class AgroServicesRepo {
       if (response.statusCode == 201) {
         return right(ResultAiModel.fromJson(response.data));
       }
-      return left(ErrorAiModel.fromJson(response.data));
+    } on DioException catch (e) {
+      if (e.response!.statusCode == 422) {
+        return left(
+          ErrorAiModel(
+            message: "CONFIDENCE PAST",
+            error: e.message.toString(),
+            statusCode: 422,
+          ),
+        );
+      }
     } catch (e) {
       log(e.toString());
-      throw Exception(e.toString());
+      return left(
+        ErrorAiModel(
+          message: "Kutilmagan xatolik yuz berdi",
+          error: e.toString(),
+          statusCode: 500,
+        ),
+      );
     }
   }
 }
